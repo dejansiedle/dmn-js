@@ -15,9 +15,7 @@ export default class ChangeSupport {
         eventBus.once('root.add', context => {
           const newRootId = context.root.id;
 
-          this._listeners[newRootId] = this._listeners[oldRootId];
-
-          delete this._listeners[oldRootId];
+          this.updateId(oldRootId, newRootId);
         });
 
       }
@@ -73,6 +71,16 @@ export default class ChangeSupport {
       }
     } else {
       this._listeners[id].length = 0;
+    }
+  }
+
+  updateId(oldId, newId) {
+    if (this._listeners[oldId]) {
+
+      this._listeners[newId] = this._listeners[oldId];
+
+      delete this._listeners[oldId];
+
     }
   }
 }

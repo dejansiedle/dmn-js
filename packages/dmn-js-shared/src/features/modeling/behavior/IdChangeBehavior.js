@@ -8,10 +8,24 @@ const ID = 'id';
 
 
 export default class IdChangeBehavior extends CommandInterceptor {
-  constructor(eventBus) {
+  constructor(changeSupport, eventBus) {
     super(eventBus);
 
+    this._changeSupport = changeSupport;
+
+    this.preExecute('updateProperties', this.updateChangeSupport.bind(this));
+
     this.executed('updateProperties', this.updateIds.bind(this));
+  }
+
+  updateChangeSupport({ context }) {
+    const { element, properties } = context;
+
+    if (!is(element, 'dmn:DRGElement') || !isIdChange(element, properties)) {
+      return;
+    }
+
+    this._changeSupport.updateId(element.id, properties.id);
   }
 
   updateIds({ context }) {
@@ -32,13 +46,13 @@ export default class IdChangeBehavior extends CommandInterceptor {
 
 }
 
-IdChangeBehavior.$inject = [ 'eventBus' ];
+IdChangeBehavior.$inject = [ 'changeSupport', 'eventBus' ];
 
 
 // helpers //////////////////////
 
-function isIdChange(oldProperties, properties) {
-  return ID in oldProperties && ID in properties;
+function isIdChange(oldPropertiesOrElement, properties) {
+  return ID in oldPropertiesOrElement && ID in properties;
 }
 
 function getDrgElements(element) {
